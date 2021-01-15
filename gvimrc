@@ -6,7 +6,7 @@ if has("mac") || has("macunix")
     set gfn=IBM\ Plex\ Mono:h14,Hack:h14,Source\ Code\ Pro:h15,Menlo:h15
 elseif has("win16") || has("win32")
     "set gfn=IBM\ Plex\ Mono:h11,Source\ Code\ Pro:h12,Bitstream\ Vera\ Sans\ Mono:h11
-    set gfn=Inconsolata:h12,Source\ Code\ Pro:h12,Bitstream\ Vera\ Sans\ Mono:h11
+    set gfn=Inconsolata:h12,Source\ Code\ Pro:h12,Consolas:h12
     "set gfn=Consolas:h12,Source\ Code\ Pro:h12,Bitstream\ Vera\ Sans\ Mono:h11
     "set gfn=Roboto\ Mono\ for\ Powerline:h12,Source\ Code\ Pro:h12,Bitstream\ Vera\ Sans\ Mono:h11
 elseif has("gui_gtk2")
@@ -34,8 +34,8 @@ set guitablabel=%M\ %t
 "set background=dark
 "colorscheme peaksea
 "let ayucolor="mirage"
-let ayucolor="dark"
-colorscheme ayu
+" let ayucolor="dark"
+" colorscheme ayu
 
 " No bells
 set belloff=all

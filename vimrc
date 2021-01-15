@@ -17,34 +17,6 @@ set fileencoding=utf-8
 "
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-let mapleader = ","
-"set clipboard^=unnamed
-
-" windows to split right vertically and split below horizontally by default
-set splitbelow
-set splitright
-
-inoremap jk <ESC>
-nnoremap <leader>ev <C-w><C-v><C-l>:e $MYVIMRC<CR>
-
-nmap <C-s> <Plug>MarkdownPreview
-nmap <M-s> <Plug>MarkdownPreviewStop
-"nmap <C-p> <Plug>MarkdownPreviewToggle
-
-let vim_markdown_folding_disabled = 1
-
-set number
-set relativenumber
-set cursorline
-
-" remove -- INSERT -- 
-set noshowmode
-
-noremap <silent> <expr> j (v:count == 0 ? 'gj' : 'j')
-noremap <silent> <expr> k (v:count == 0 ? 'gk' : 'k')
-
-noremap! <C-BS> <C-W>
-
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " => General
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -69,6 +41,62 @@ nmap <leader>w :w!<cr>
 " (useful for handling the permission-denied error)
 command! W execute 'w !sudo tee % > /dev/null' <bar> edit!
 
+autocmd FileType autohotkey setlocal commentstring=#\ %s
+
+let mapleader = ","
+"set clipboard^=unnamed
+
+" windows to split right vertically and split below horizontally by default
+set splitbelow
+set splitright
+
+inoremap jk <ESC>
+nnoremap <leader>ev <C-w><C-v><C-l>:e $MYVIMRC<CR>
+
+
+nmap <C-s> <Plug>MarkdownPreview
+nmap <M-s> <Plug>MarkdownPreviewStop
+"nmap <C-p> <Plug>MarkdownPreviewToggle
+
+let vim_markdown_folding_disabled = 1
+
+set number
+set relativenumber
+set cursorline
+
+" remove -- INSERT -- 
+set noshowmode
+
+noremap <silent> <expr> j (v:count == 0 ? 'gj' : 'j')
+noremap <silent> <expr> k (v:count == 0 ? 'gk' : 'k')
+
+noremap! <C-BS> <C-W>
+
+""""""""""""""""""""""""""""""
+" => vim-plug init
+""""""""""""""""""""""""""""""
+" call plug#begin('~/.vim/plugged')
+call plug#begin('~/vimfiles/plugged')
+
+Plug 'junegunn/vim-easy-align'
+Plug 'jlanzarotta/bufexplorer'
+Plug 'junegunn/goyo.vim'
+Plug 'itchyny/lightline.vim'
+Plug 'preservim/nerdtree'
+Plug 'tpope/vim-commentary'
+Plug 'michaeljsmith/vim-indent-object'
+Plug 'plasticboy/vim-markdown'
+Plug 'tpope/vim-surround'
+Plug 'amix/vim-zenroom2'
+Plug 'tpope/vim-fugitive'
+Plug 'airblade/vim-gitgutter'
+Plug 'flrnd/plastic.vim'
+Plug 'ayu-theme/ayu-vim'
+Plug 'ctrlpvim/ctrlp.vim'
+
+call plug#end()
+
+
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " => VIM user interface
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -92,7 +120,7 @@ else
     set wildignore+=*/.git/*,*/.hg/*,*/.svn/*,*/.DS_Store
 endif
 
-"Always show current position
+" Always show current position
 set ruler
 
 " Height of the command bar
@@ -135,8 +163,8 @@ set t_vb=
 set tm=500
 
 " Add a bit extra margin to the left
-"set foldcolumn=1
-set foldcolumn=0
+set foldcolumn=1
+" set foldcolumn=0
 
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -160,6 +188,10 @@ set background=dark
 if !has('gui_running')
   set t_Co=256
 endif
+
+set termguicolors     " enable true colors support
+let ayucolor="mirage"   " {'light', 'mirage', 'dark'}
+colorscheme ayu
 
 " " Set extra options when running in GUI mode
 " if has("gui_running")
@@ -203,19 +235,32 @@ set ai "Auto indent
 set si "Smart indent
 set wrap "Wrap lines
 
-
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " => Fast editing and reloading of vimrc configs
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-map <leader>e :e! $HOME/vimfiles/vimrc<cr>
-autocmd! bufwritepost $HOME/vimfiles/vimrc source $HOME/vimfiles/vimrc
+if has("win16") || has("win32")
+    map <leader>e :e! $HOME/vimfiles/vimrc<cr>
+    " autocmd! bufwritepost $HOME/vimfiles/vimrc source $HOME/vimfiles/vimrc
+    augroup vimrc     " Source vim configuration upon save
+        autocmd! BufWritePost $MYVIMRC nested source % | echom "Reloaded " . $MYVIMRC | redraw
+        autocmd! BufWritePost $MYGVIMRC if has('gui_running') | nested so % | echom "Reloaded " . $MYGVIMRC | endif | redraw
+  augroup END
+else
+    map <leader>e :e! ~/.vimrc<cr>
+    autocmd! bufwritepost ~/.vimrc source ~/.vimrc
+endif
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " => Turn persistent undo on 
 "    means that you can undo even when you close a buffer/VIM
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
 try
-    set undodir=$HOME/vimfiles/temp_dirs/undodir
+    if has("win16") || has("win32")
+        set undodir=$HOME/vimfiles/temp_dirs/undodir
+    else
+        set undodir=~/.vim/temp_dirs/undodir
+    endif
     set undofile
 catch
 endtry
@@ -370,7 +415,7 @@ au FileType python map <buffer> <leader>D ?def
 
 
 """"""""""""""""""""""""""""""
-" Plugin tweaks
+" => Plugin tweaks
 """"""""""""""""""""""""""""""
 
 """"""""""""""""""""""""""""""
@@ -414,19 +459,23 @@ let g:lightline = {
       \   'right': [ [ 'lineinfo' ], ['percent'], ['filetype'] ]
       \ },
       \ 'component': {
-      \   'readonly': '%{&filetype=="help"?"":&readonly?"Â¿":""}',
+      \   'readonly': '%{&filetype=="help"?"":&readonly?"RO":""}',
       \   'modified': '%{&filetype=="help"?"":&modified?"+":&modifiable?"":"-"}',
-      \   'fugitive': '%{exists("*fugitive#head")?fugitive#head():""}'
+      \   'fugitive': '%{exists("*FugitiveHead")?FugitiveHead():""}'
       \ },
       \ 'component_visible_condition': {
       \   'readonly': '(&filetype!="help"&& &readonly)',
       \   'modified': '(&filetype!="help"&&(&modified||!&modifiable))',
-      \   'fugitive': '(exists("*fugitive#head") && ""!=fugitive#head())'
+      \   'fugitive': '(exists("*FugitiveHead") && ""!=FugitiveHead())'
       \ },
       \ 'separator': { 'left': ' ', 'right': ' ' },
       \ 'subseparator': { 'left': ' ', 'right': ' ' }
       \ }
 
+
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" => Markdown
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " set to 1, nvim will open the preview window after entering the markdown buffer
 " default: 0
 let g:mkdp_auto_start = 0
@@ -509,6 +558,15 @@ let g:mkdp_port = ''
 " preview page title
 " ${name} will be replace with the file name
 " let g:mkdp_page_title = '${name}'
+
+
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" => Git gutter (Git diff)
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+set updatetime=200 " for the signs to update themselves faster (default 4000)
+let g:gitgutter_enabled = 0
+let g:gitgutter_set_sign_backgrounds = 1
+nnoremap <silent> <leader>d :GitGutterToggle<cr>
 
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
