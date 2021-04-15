@@ -20,6 +20,13 @@ set fileencoding=utf-8
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " => General
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+if has("win16") || has("win32")
+    let g:VIMDIR = "$HOME/vimfiles/"
+else
+    let g:VIMDIR = "~/.vim/"
+endif
+
 " Sets how many lines of history VIM has to remember
 set history=500
 
@@ -63,6 +70,7 @@ let vim_markdown_folding_disabled = 1
 set number
 set relativenumber
 set cursorline
+set cursorcolumn
 
 " remove -- INSERT -- 
 set noshowmode
@@ -75,8 +83,14 @@ noremap! <C-BS> <C-W>
 """"""""""""""""""""""""""""""
 " => vim-plug init
 """"""""""""""""""""""""""""""
-" call plug#begin('~/.vim/plugged')
-call plug#begin('~/vimfiles/plugged')
+" Autoinstall vim-plug
+let data_dir = has('nvim') ? stdpath('data') . '/site' : VIMDIR
+if empty(glob(data_dir . '/autoload/plug.vim'))
+    silent execute '!curl -fLo '.data_dir.'/autoload/plug.vim --create-dirs  https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim'
+    autocmd VimEnter * PlugInstall --sync | source $MYVIMRC
+endif
+
+call plug#begin(VIMDIR . '/plugged')
 
 Plug 'junegunn/vim-easy-align'
 Plug 'jlanzarotta/bufexplorer'
@@ -244,10 +258,11 @@ if has("win16") || has("win32")
     augroup vimrc     " Source vim configuration upon save
         autocmd! BufWritePost $MYVIMRC nested source % | echom "Reloaded " . $MYVIMRC | redraw
         autocmd! BufWritePost $MYGVIMRC if has('gui_running') | nested so % | echom "Reloaded " . $MYGVIMRC | endif | redraw
-  augroup END
+    augroup END
 else
     map <leader>e :e! ~/.vimrc<cr>
-    autocmd! bufwritepost ~/.vimrc source ~/.vimrc
+    " autocmd! bufwritepost ~/.vimrc source ~/.vimrc
+    autocmd! BufWritePost $MYVIMRC nested source % | echom "Reloaded " . $MYVIMRC | redraw
 endif
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -256,11 +271,7 @@ endif
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 try
-    if has("win16") || has("win32")
-        set undodir=$HOME/vimfiles/temp_dirs/undodir
-    else
-        set undodir=~/.vim/temp_dirs/undodir
-    endif
+    set undodir = VIMDIR . '/undodir'
     set undofile
 catch
 endtry
